@@ -1,5 +1,6 @@
 const fs = require('fs');
 const Tour = require('../models/tourModel');
+const APIFeatures = require('../utils/apiFeatures');
 
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
@@ -33,11 +34,8 @@ const Tour = require('../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    const queryObj = { ...req.query };
-
-    console.log(queryObj);
-
-    const tours = await Tour.find();
+    // console.log(JSON.parse(queryStr));
+    // console.log(req.query);
 
     // const tours = await Tour.find({ duration: 5, difficulty: 'easy' });
 
@@ -46,6 +44,66 @@ exports.getAllTours = async (req, res) => {
     //   .equals(5)
     //   .where('difficulty')
     //   .equals('easy');
+    // console.log(req.query, queryObj);
+
+    // //1. Filtering
+    // const queryObj = { ...req.query };
+
+    // // removing not necessary queries for tour search
+    // const excludedFields = ['page', 'sort', 'limit', 'fields'];
+
+    // excludedFields.forEach((el) => delete queryObj[el]);
+
+    // // 2. Advance filtering
+    // let queryStr = JSON.stringify(queryObj);
+    // queryStr = queryStr.replace(/\b(gte|lte|gt|lt)\b/g, (match) => `$${match}`);
+
+    // let query = Tour.find(JSON.parse(queryStr));
+
+    //3. Sorting
+    // if (req.query.sort) {
+    //   const sortBy = req.query.sort.split(',').join(' ');
+    //   //console.log(sortBy);
+    //   //query.sort('price ratingsAverage')
+    //   query = query.sort(sortBy);
+    // } else {
+    //   query = query.sort('createdAt');
+    // }
+    //4. Limiting
+    // if (req.query.fields) {
+    //   const limits = req.query.fields.split(',').join(' ');
+    //   // console.log(limits);
+    //   query = query.select(limits);
+    // } else {
+    //   query = query.select('-__v');
+    // }
+
+    //5. Pagination
+    // console.log(req.query);
+    // const page = req.query.page * 1 || 1; // by default value will be one JS method o defining default values
+    // const limit = req.query.limit * 1 || 100;
+    // const skip = (page - 1) * limit;
+
+    // //?page=3&limit=2 10 results has to be skipped and after those 10 ,10 should be shown ...... thats 1-10 on first page 11-20 on second .... if we want to go to third page then skip(20).limit(10)
+    // // if (req.query.page.page && req.query.limit) {
+    // //   query = query.skip(4).limit(2);
+    // // }
+
+    // query = query.skip(skip).limit(limit);
+
+    // if (req.query.page) {
+    //   const numTours = await Tour.countDocuments();
+    //   if (skip >= numTours) throw new Error('Page Does Not Exist');
+    // }
+
+    //EXECUTING query
+    const features = new APIFeatures(Tour.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+
+    const tours = await features.query;
 
     res.json({
       status: 'success',
@@ -55,8 +113,16 @@ exports.getAllTours = async (req, res) => {
   } catch (err) {
     res.status(404).json({
       status: 'failed',
+      message: err,
     });
   }
+};
+
+exports.aliasTopTours = async (req, res, next) => {
+  (req.query.limit = '5'),
+    (req.query.sort = 'price,-ratingsAverage'),
+    (req.query.fields = 'price,difficulty,name,summary,ratingsAverage');
+  next();
 };
 
 exports.getTour = async (req, res) => {
