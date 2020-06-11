@@ -1,4 +1,6 @@
 const express = require('express');
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
@@ -36,6 +38,22 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.all('*', (req, res, next) => {
+  // const err = new Error();
+  // err.status = 'fail';
+  // err.statusCode = 404;
+  // err.message = `cant find ${req.originalUrl}`;
+
+  next(new AppError(`Cant find ${req.originalUrl} on this server !!`, 404));
+});
+app.use(globalErrorHandler);
+
+// app.all('*', (req, res, next) => {
+//   res.send(404).json({
+//     status: 'Failed',
+//     message: `Cant find ${req.originalUrl}`,
+//   });
+// });
 
 module.exports = app;
 // app.route('/api/v1/tours').get(getAllTours).post(createTour);
