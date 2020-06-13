@@ -1,4 +1,3 @@
-const fs = require('fs');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/cathcAsync');
 const Tour = require('../models/tourModel');

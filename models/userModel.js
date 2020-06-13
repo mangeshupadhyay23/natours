@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please Create A Password'],
     minlength: [8, 'A password must have at least 8 characters'],
+    select: false, //so that wont be visible to user
   },
   passwordConfirm: {
     type: String,
@@ -31,6 +32,9 @@ const userSchema = new mongoose.Schema({
       },
       message: 'Confirm Password does not match actual password',
     },
+  },
+  passwordChangedAt: {
+    type: Date,
   },
 });
 
@@ -45,6 +49,22 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+//instance Method : it will be availavle with all user documents (here we are already importing user document whose mail matches entered ID)
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changePasswordAfter = async function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    console.log(Date(this.passwordChangedAt), Date(JWTTimestamp));
+  }
+
+  return false;
+};
 
 const User = mongoose.model('User', userSchema);
 
