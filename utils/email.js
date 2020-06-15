@@ -8,13 +8,14 @@ const sendEmail = async (options) => {
     //service: 'Gmail',
     auth: {
       user: process.env.EMAIL_USERNAME,
-      password: process.env.EMAIL_PASSWORD,
+      pass: process.env.EMAIL_PASSWORD,
     },
+
     // Activate in gmail "less secure app" option
   });
   // Step 2=> define Options
   const mailOptions = {
-    from: 'Natours ',
+    from: 'Natours <mshanit@gmail.com>',
     to: options.email,
     subject: options.subject,
     text: options.message,

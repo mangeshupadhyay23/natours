@@ -58,6 +58,14 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) {
+    return next();
+  }
+  this.passwordChangedAt = Date.now() - 2000; //To make sure that passwordChanged after is always set before issuing JWT token
+  next();
+});
+
 //instance Method : it will be availavle with all user documents (here we are already importing user document whose mail matches entered ID)
 userSchema.methods.correctPassword = async function (
   candidatePassword,
@@ -89,7 +97,7 @@ userSchema.methods.createPasswordResetToke = function () {
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-  this.passwordResetExpires = Date.now() + 1;
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   console.log({ resetToken }, this.passwordResetToken);
   return resetToken;
 };
