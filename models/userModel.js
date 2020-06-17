@@ -44,6 +44,11 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -63,6 +68,12 @@ userSchema.pre('save', function (next) {
     return next();
   }
   this.passwordChangedAt = Date.now() - 2000; //To make sure that passwordChanged after is always set before issuing JWT token
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  // this points to current query
+  this.find({ active: { $ne: false } });
   next();
 });
 
