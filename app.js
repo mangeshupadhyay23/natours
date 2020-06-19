@@ -9,6 +9,7 @@ const globalErrorHandler = require('./controllers/errorController');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
+const reviewRouter = require('./routes/reviewRoutes');
 const app = express();
 
 /// 1)GLOBAL  Middlewares
@@ -78,6 +79,7 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 app.all('*', (req, res, next) => {
   // const err = new Error();
   // err.status = 'fail';

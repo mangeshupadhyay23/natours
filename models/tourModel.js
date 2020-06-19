@@ -99,16 +99,35 @@ const tourSchema = new mongoose.Schema(
         day: Number,
       },
     ],
-  }
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
+    review: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Review',
+      },
+    ],
+  },
 
-  //   {
-  //     toJSON: { virtuals: true },
-  //     toObject: { virtuals: true },
-  //   }
+  {
+    toJSON: { virtuals: true }, // it stores property not specified in schema into database as vitrual props
+    toObject: { virtuals: true },
+  }
 );
 // tourSchema.virtual('durationInWeeks').get(function () {
 //   return this.duration / 7;
 // });
+
+// Virtual Populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
 
 //document middleware : run before .save() and .create()
 tourSchema.pre('save', function (next) {
@@ -133,6 +152,23 @@ tourSchema.pre(/^find/, function (next) {
   this.start = Date.now();
   next();
 });
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+
+  next();
+});
+
+// FOR EMBEDING
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromise = this.guides.map(async (id) => await User.findById(id));
+
+//   this.guides = await Promise.all(guidesPromise);
+//   next();
+// });
+
 tourSchema.post(/^find/, function (docs, next) {
   //   console.log(docs);
   next();

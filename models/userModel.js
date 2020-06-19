@@ -3,53 +3,59 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Please Enter Your Name'],
-  },
-  email: {
-    type: String,
-    required: [true, 'Please Provide Your Email'],
-    lowercase: true,
-    unique: true,
-    validate: [validator.isEmail, 'Please Provide A Valid Email'],
-  },
-  photo: {
-    type: String,
-  },
-  password: {
-    type: String,
-    required: [true, 'Please Create A Password'],
-    minlength: [8, 'A password must have at least 8 characters'],
-    select: false, //so that wont be visible to user
-  },
-  passwordConfirm: {
-    type: String,
-    required: [true, 'Please Confirm Your Password'],
-    validate: {
-      validator: function (el) {
-        return el === this.password;
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, 'Please Enter Your Name'],
+    },
+    email: {
+      type: String,
+      required: [true, 'Please Provide Your Email'],
+      lowercase: true,
+      unique: true,
+      validate: [validator.isEmail, 'Please Provide A Valid Email'],
+    },
+    photo: {
+      type: String,
+    },
+    password: {
+      type: String,
+      required: [true, 'Please Create A Password'],
+      minlength: [8, 'A password must have at least 8 characters'],
+      select: false, //so that wont be visible to user
+    },
+    passwordConfirm: {
+      type: String,
+      required: [true, 'Please Confirm Your Password'],
+      validate: {
+        validator: function (el) {
+          return el === this.password;
+        },
+        message: 'Confirm Password does not match actual password',
       },
-      message: 'Confirm Password does not match actual password',
+    },
+    passwordChangedAt: {
+      type: Date,
+    },
+    role: {
+      type: String,
+      enum: ['user', 'guide', 'lead-guide', 'admin'],
+      default: 'user',
+    },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
     },
   },
-  passwordChangedAt: {
-    type: Date,
-  },
-  role: {
-    type: String,
-    enum: ['user', 'guide', 'lead-guide', 'admin'],
-    default: 'user',
-  },
-  passwordResetToken: String,
-  passwordResetExpires: Date,
-  active: {
-    type: Boolean,
-    default: true,
-    select: false,
-  },
-});
+  {
+    toJSON: { virtuals: true }, // it stores property not specified in schema into database as vitrual props
+    toObject: { virtuals: true },
+  }
+);
 
 userSchema.pre('save', async function (next) {
   //only run if password is not modified that is hasing is not done
