@@ -34,91 +34,93 @@ const factory = require('./handlerFactory');
 //   next();
 // };
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  // try {
-  // console.log(JSON.parse(queryStr));
-  // console.log(req.query);
+exports.getAllTours = factory.getAll(Tour);
 
-  // const tours = await Tour.find({ duration: 5, difficulty: 'easy' });
+// exports.getAllTours = catchAsync(async (req, res, next) => {
+//   // try {
+//   // console.log(JSON.parse(queryStr));
+//   // console.log(req.query);
 
-  // const tours = await Tour.find()
-  //   .where('duration')
-  //   .equals(5)
-  //   .where('difficulty')
-  //   .equals('easy');
-  // console.log(req.query, queryObj);
+//   // const tours = await Tour.find({ duration: 5, difficulty: 'easy' });
 
-  // //1. Filtering
-  // const queryObj = { ...req.query };
+//   // const tours = await Tour.find()
+//   //   .where('duration')
+//   //   .equals(5)
+//   //   .where('difficulty')
+//   //   .equals('easy');
+//   // console.log(req.query, queryObj);
 
-  // // removing not necessary queries for tour search
-  // const excludedFields = ['page', 'sort', 'limit', 'fields'];
+//   // //1. Filtering
+//   // const queryObj = { ...req.query };
 
-  // excludedFields.forEach((el) => delete queryObj[el]);
+//   // // removing not necessary queries for tour search
+//   // const excludedFields = ['page', 'sort', 'limit', 'fields'];
 
-  // // 2. Advance filtering
-  // let queryStr = JSON.stringify(queryObj);
-  // queryStr = queryStr.replace(/\b(gte|lte|gt|lt)\b/g, (match) => `$${match}`);
+//   // excludedFields.forEach((el) => delete queryObj[el]);
 
-  // let query = Tour.find(JSON.parse(queryStr));
+//   // // 2. Advance filtering
+//   // let queryStr = JSON.stringify(queryObj);
+//   // queryStr = queryStr.replace(/\b(gte|lte|gt|lt)\b/g, (match) => `$${match}`);
 
-  //3. Sorting
-  // if (req.query.sort) {
-  //   const sortBy = req.query.sort.split(',').join(' ');
-  //   //console.log(sortBy);
-  //   //query.sort('price ratingsAverage')
-  //   query = query.sort(sortBy);
-  // } else {
-  //   query = query.sort('createdAt');
-  // }
-  //4. Limiting
-  // if (req.query.fields) {
-  //   const limits = req.query.fields.split(',').join(' ');
-  //   // console.log(limits);
-  //   query = query.select(limits);
-  // } else {
-  //   query = query.select('-__v');
-  // }
+//   // let query = Tour.find(JSON.parse(queryStr));
 
-  //5. Pagination
-  // console.log(req.query);
-  // const page = req.query.page * 1 || 1; // by default value will be one JS method o defining default values
-  // const limit = req.query.limit * 1 || 100;
-  // const skip = (page - 1) * limit;
+//   //3. Sorting
+//   // if (req.query.sort) {
+//   //   const sortBy = req.query.sort.split(',').join(' ');
+//   //   //console.log(sortBy);
+//   //   //query.sort('price ratingsAverage')
+//   //   query = query.sort(sortBy);
+//   // } else {
+//   //   query = query.sort('createdAt');
+//   // }
+//   //4. Limiting
+//   // if (req.query.fields) {
+//   //   const limits = req.query.fields.split(',').join(' ');
+//   //   // console.log(limits);
+//   //   query = query.select(limits);
+//   // } else {
+//   //   query = query.select('-__v');
+//   // }
 
-  // //?page=3&limit=2 10 results has to be skipped and after those 10 ,10 should be shown ...... thats 1-10 on first page 11-20 on second .... if we want to go to third page then skip(20).limit(10)
-  // // if (req.query.page.page && req.query.limit) {
-  // //   query = query.skip(4).limit(2);
-  // // }
+//   //5. Pagination
+//   // console.log(req.query);
+//   // const page = req.query.page * 1 || 1; // by default value will be one JS method o defining default values
+//   // const limit = req.query.limit * 1 || 100;
+//   // const skip = (page - 1) * limit;
 
-  // query = query.skip(skip).limit(limit);
+//   // //?page=3&limit=2 10 results has to be skipped and after those 10 ,10 should be shown ...... thats 1-10 on first page 11-20 on second .... if we want to go to third page then skip(20).limit(10)
+//   // // if (req.query.page.page && req.query.limit) {
+//   // //   query = query.skip(4).limit(2);
+//   // // }
 
-  // if (req.query.page) {
-  //   const numTours = await Tour.countDocuments();
-  //   if (skip >= numTours) throw new Error('Page Does Not Exist');
-  // }
+//   // query = query.skip(skip).limit(limit);
 
-  //EXECUTING query
-  const features = new APIFeatures(Tour.find(), req.query)
-    .filter()
-    .sort()
-    .limitFields()
-    .paginate();
+//   // if (req.query.page) {
+//   //   const numTours = await Tour.countDocuments();
+//   //   if (skip >= numTours) throw new Error('Page Does Not Exist');
+//   // }
 
-  const tours = await features.query;
+//   //EXECUTING query
+//   const features = new APIFeatures(Tour.find(), req.query)
+//     .filter()
+//     .sort()
+//     .limitFields()
+//     .paginate();
 
-  res.json({
-    status: 'success',
-    length: tours.length,
-    data: { tours: tours },
-  });
-  // } catch (err) {
-  //   res.status(404).json({
-  //     status: 'failed',
-  //     message: err,
-  //   });
-  // }
-});
+//   const tours = await features.query;
+
+//   res.json({
+//     status: 'success',
+//     length: tours.length,
+//     data: { tours: tours },
+//   });
+//   // } catch (err) {
+//   //   res.status(404).json({
+//   //     status: 'failed',
+//   //     message: err,
+//   //   });
+//   // }
+// });
 
 exports.aliasTopTours = catchAsync(async (req, res, next) => {
   (req.query.limit = '5'),
@@ -127,107 +129,110 @@ exports.aliasTopTours = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.getTour = catchAsync(async (req, res, next) => {
-  // console.log(req.params);
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
+// exports.getTour = catchAsync(async (req, res, next) => {
+//   // console.log(req.params);
 
-  // const id = req.params.id * 1;
-  // const tour = tours.find((el) => {
-  //   return el.id === id;
-  // });
+//   // const id = req.params.id * 1;
+//   // const tour = tours.find((el) => {
+//   //   return el.id === id;
+//   // });
 
-  // try {
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-  // const tour = await Tour.find({ _id: req.params.id });
+//   // try {
+//   const tour = await Tour.findById(req.params.id).populate('reviews');
+//   // const tour = await Tour.find({ _id: req.params.id });
 
-  if (!tour) {
-    return next(new AppError(err, 404));
-  }
-  res.json({
-    status: 'Success',
-    data: {
-      tour,
-    },
-  });
-  // } catch (err) {
-  //   res.status(404).json({
-  //     status: 'failed',
-  //   });
-  // }
+//   if (!tour) {
+//     return next(new AppError(err, 404));
+//   }
+//   res.json({
+//     status: 'Success',
+//     data: {
+//       tour,
+//     },
+//   });
+//   // } catch (err) {
+//   //   res.status(404).json({
+//   //     status: 'failed',
+//   //   });
+//   // }
 
-  // res.json({
-  //   status: 'Success',
-  //   data: {
-  //     tour,
-  //   },
-  // });
-});
+//   // res.json({
+//   //   status: 'Success',
+//   //   data: {
+//   //     tour,
+//   //   },
+//   // });
+// });
 
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
+exports.createTour = factory.createOne(Tour);
+// exports.createTour = catchAsync(async (req, res, next) => {
+//   const newTour = await Tour.create(req.body);
 
-  res.json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-  // try {
-  //   //// here we pass the data to a variable newTour and then we save it
-  //   // const newTour= new Tour({
-  //   //   name:'The Forest Hiker',
-  //   //   price:297,
-  //   //   rating:4.7
-  //   // })
-  //   // newTour.save()
+//   res.json({
+//     status: 'success',
+//     data: {
+//       tour: newTour,
+//     },
+//   });
+// try {
+//   //// here we pass the data to a variable newTour and then we save it
+//   // const newTour= new Tour({
+//   //   name:'The Forest Hiker',
+//   //   price:297,
+//   //   rating:4.7
+//   // })
+//   // newTour.save()
 
-  //   //// whereas here we directly save the data without passing it as a var
-  // const newTour = await Tour.create(req.body);
-  // console.log(newTour);
+//   //// whereas here we directly save the data without passing it as a var
+// const newTour = await Tour.create(req.body);
+// console.log(newTour);
 
-  // res.json({
-  //   status: 'success',
-  //   data: {
-  //     tour: newTour,
-  //   },
-  // });
+// res.json({
+//   status: 'success',
+//   data: {
+//     tour: newTour,
+//   },
+// });
 
-  // } catch (err) {
-  //   res.status(400).json({
-  //     status: 'Failed',
-  //     message: err,
-  //   });
-  // }
-});
+// } catch (err) {
+//   res.status(400).json({
+//     status: 'Failed',
+//     message: err,
+//   });
+// }
+// });
 
-exports.updateTour = catchAsync(async (req, res, next) => {
-  // try {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  // const tour = await Tour.updateOne(
-  //   { _id: req.params.id },
-  //   { $set: req.body },
-  //   {
-  //     new: true,
-  //   }
-  // );
-  if (!tour) {
-    return next(new AppError(`No tour found with ID : ${req.params.id}`, 404));
-  }
-  res.json({
-    status: 'success',
-    data: {
-      // tour: tour,
-      tour,
-    },
-  });
-  // } catch {
-  //   res.status(404).json({
-  //     status: 'FAILED',
-  //   });
-  // }
-});
+exports.updateTour = factory.updateOne(Tour);
+// exports.updateTour = catchAsync(async (req, res, next) => {
+//   // try {
+//   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+//     new: true,
+//     runValidators: true,
+//   });
+//   // const tour = await Tour.updateOne(
+//   //   { _id: req.params.id },
+//   //   { $set: req.body },
+//   //   {
+//   //     new: true,
+//   //   }
+//   // );
+//   if (!tour) {
+//     return next(new AppError(`No tour found with ID : ${req.params.id}`, 404));
+//   }
+//   res.json({
+//     status: 'success',
+//     data: {
+//       // tour: tour,
+//       tour,
+//     },
+//   });
+//   // } catch {
+//   //   res.status(404).json({
+//   //     status: 'FAILED',
+//   //   });
+//   // }
+// });
 
 exports.deleteTour = factory.deleteOne(Tour);
 // exports.deleteTour = catchAsync(async (req, res, next) => {

@@ -3,6 +3,7 @@ const catchAsync = require('../utils/cathcAsync');
 const User = require('../models/userModel');
 const APIFeatures = require('../utils/apiFeatures');
 const cathcAsync = require('../utils/cathcAsync');
+const factory = require('../controllers/handlerFactory');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -12,17 +13,24 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find();
+// THis will put a fake id in Params
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users,
-    },
-  });
-});
+exports.getAllUsers = factory.getAll(User);
+// exports.getAllUsers = catchAsync(async (req, res) => {
+//   const users = await User.find();
+
+//   res.status(200).json({
+//     status: 'success',
+//     results: users.length,
+//     data: {
+//       users,
+//     },
+//   });
+// });
 exports.createUser = (req, res) => {
   res.status(500).json({
     status: 'error',
@@ -53,24 +61,9 @@ exports.updateMe = async (req, res, next) => {
   });
 };
 
-exports.getUser = (req, res) => {
-  res.status(200).json({
-    status: 'error',
-    message: 'Not yet defined',
-  });
-};
-exports.updateUser = (req, res) => {
-  res.status(200).json({
-    status: 'error',
-    message: 'Not yet defined',
-  });
-};
-exports.deleteUser = (req, res) => {
-  res.status(200).json({
-    status: 'error',
-    message: 'Not yet defined',
-  });
-};
+exports.getUser = factory.getOne(User);
+exports.updateUser = factory.updateOne(User); // DO not update password with it
+exports.deleteUser = factory.deleteOne(User); // only permited to admin
 
 exports.deleteMe = cathcAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(req.user.id, { active: false });

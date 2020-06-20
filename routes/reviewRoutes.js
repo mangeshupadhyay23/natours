@@ -7,14 +7,26 @@ const router = express.Router({ mergeParams: true });
 // POST /reviews
 // both these routes will end up here
 
+router.use(authController.protect);
+
 router
   .route('/')
-  .get(authController.protect, reviewController.getAllReviews)
+  .get(reviewController.getAllReviews)
   .post(
-    authController.protect,
     authController.restrictedTo('user'),
+    reviewController.setTourUserIds,
     reviewController.createReview
   );
-router.route('/:id').delete(reviewController.deleteReview);
+router
+  .route('/:id')
+  .patch(reviewController.updateReview)
+  .delete(
+    authController.restrictedTo('user', 'admin'),
+    reviewController.deleteReview
+  )
+  .get(
+    authController.restrictedTo('user', 'admin'),
+    reviewController.getReview
+  );
 
 module.exports = router;
