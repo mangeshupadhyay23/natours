@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
@@ -10,7 +11,13 @@ const morgan = require('morgan');
 const tourRouter = require('./routes/tourRouter');
 const userRouter = require('./routes/userRouter');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+//Serving Static file
+app.use(express.static(path.join(__dirname, 'public')));
 
 /// 1)GLOBAL  Middlewares
 //SECURITY HTTP HEADERS
@@ -52,12 +59,10 @@ app.use(
     ],
   })
 );
-//Serving Static file
-app.use(express.static(`${__dirname}/public`));
 
 // Testing middleware
 app.use((req, res, next) => {
-  console.log('Hello form middleware');
+  //console.log('Hello form middleware');
   next();
 });
 
@@ -76,10 +81,11 @@ app.use((req, res, next) => {
 // app.get('/api/v1/tour/:id', getTour);
 
 ///3) ROUTES
-
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+
 app.all('*', (req, res, next) => {
   // const err = new Error();
   // err.status = 'fail';
