@@ -19,7 +19,7 @@ exports.getTour = catchAsync(async (req, res) => {
     path: 'reviews',
     fields: 'review rating user',
   });
-  console.log(tour.reviews);
+
   // STEP 2 => build templtes(not here)
 
   // STEP 3 => RENDER DATA
