@@ -23,28 +23,54 @@ const handleWebTokenError = (err) => {
   return new AppError('Invalid token, Please Login again', 401);
 };
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    name: err.name,
-    message: err.message,
-    error: err,
-  });
-};
-
-const sendErrorProd = (err, res) => {
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
+const sendErrorDev = (err, req, res) => {
+  /// ERRORS TO SHOW IN API
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
       status: err.status,
+      name: err.name,
       message: err.message,
+      error: err,
     });
   } else {
-    console.error('ERROR', err);
+    //// ERRORS FOR RENDERED PAGES
 
-    res.status(500).json({
-      status: 'error',
-      message: 'Something went very wrong !',
+    return res.status(err.statusCode).render('error', {
+      title: 'Something Went Wrong',
+      msg: err.message,
     });
+  }
+};
+
+const sendErrorProd = (err, req, res) => {
+  if (req.originalUrl.startsWith('/api')) {
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    } else {
+      console.error('ERROR', err);
+
+      return res.status(500).json({
+        status: 'error',
+        message: 'Something went very wrong !',
+      });
+    }
+  } else {
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+    } else {
+      console.error('ERROR', err);
+
+      return res.status(500).json({
+        status: 'error',
+        message: 'Something went very wrong !',
+      });
+    }
   }
 };
 
@@ -53,7 +79,7 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
 
@@ -62,6 +88,6 @@ module.exports = (err, req, res, next) => {
     if (err.code === 11000) error = handleDuplicateFieldsDB(err);
     if (err.name === 'JsonWebTokenError') error = handleWebTokenError(err);
     if (err.name === 'TokenExpireError') erroor = handleJwtExpireError(err);
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 };

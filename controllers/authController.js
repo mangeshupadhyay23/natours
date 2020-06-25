@@ -68,6 +68,14 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+exports.logout = catchAsync(async (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+});
+
 exports.protect = catchAsync(async (req, res, next) => {
   let token;
   // Step 1 => checking whether token exist
@@ -220,30 +228,33 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 });
 
 /// NO ERRORS ONLY FOR RENDERED PAGES
-exports.isLoggedIn = catchAsync(async (req, res, next) => {
+exports.isLoggedIn = async (req, res, next) => {
   if (req.cookies.jwt) {
     // Step 1=> verifying the token if it exist
+    try {
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
 
-    const decoded = await promisify(jwt.verify)(
-      req.cookies.jwt,
-      process.env.JWT_SECRET
-    );
+      // Step 2=> check if user still exist (token is not expired)
+      const currentUser = await User.findById(decoded.id);
+      if (!currentUser) {
+        return next();
+      }
 
-    // Step 2=> check if user still exist (token is not expired)
-    const currentUser = await User.findById(decoded.id);
-    if (!currentUser) {
+      // Step 3=> Check if user changed password after the token
+
+      if (await currentUser.changePasswordAfter(decoded.iat)) {
+        return next();
+      }
+
+      // There is logged in user
+      res.locals.user = currentUser;
+      return next();
+    } catch (err) {
       return next();
     }
-
-    // Step 3=> Check if user changed password after the token
-
-    if (await currentUser.changePasswordAfter(decoded.iat)) {
-      return next();
-    }
-
-    // There is logged in user
-    res.locals.user = currentUser;
-    return next();
   }
   next();
-});
+};
