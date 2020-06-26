@@ -4,6 +4,11 @@ const User = require('../models/userModel');
 const APIFeatures = require('../utils/apiFeatures');
 const cathcAsync = require('../utils/cathcAsync');
 const factory = require('../controllers/handlerFactory');
+const multer = require('multer');
+
+const upload = multer({ dest: 'public/img/users' });
+
+exports.uploadUserPhoto = upload.single('photo');
 
 const filterObj = (obj, ...allowedFields) => {
   const newObj = {};
@@ -38,6 +43,8 @@ exports.createUser = (req, res) => {
   });
 };
 exports.updateMe = async (req, res, next) => {
+  console.log(req.file);
+  console.log(req.body);
   // Step 1=> Create Error if user posts password data cause we have another route for that purpose
   if (req.body.password || req.body.passwordConfirm) {
     return next(new AppError('This route is not for upating password', 400));

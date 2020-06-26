@@ -1,6 +1,6 @@
 import { showAlert } from './alert.js';
 
-const loginForm = document.querySelector('.form');
+const loginForm = document.querySelector('.form--login');
 
 const login = async (email, password) => {
   try {
