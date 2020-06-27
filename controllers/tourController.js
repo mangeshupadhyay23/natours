@@ -1,8 +1,27 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/cathcAsync');
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const factory = require('./handlerFactory');
+
+// Filter to filter only images
+const multerFilter = (req, file, cb) => {
+  // If an image then no error
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    // If not an image then error
+    cb(new AppError('Not an image ! Please upload only image', 400), false);
+  }
+};
+
+// IT STORE THE FILE TEMPERORILY AS A BUFFER SO THAT WE CAN SAVE THE ACTUAL FILE AFTER RESIZING
+const multerStorage = multer.memoryStorage();
+
+// Multer function with defined storage space and filter
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)

@@ -30,9 +30,15 @@ if (userDataForm) {
   userDataForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     document.querySelector('.btn--save-userData').textContent = 'Updating...';
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    await updateSettings({ name, email }, 'data');
+    const form = new FormData();
+    form.append('name', document.getElementById('name').value);
+    form.append('email', document.getElementById('email').value);
+    form.append('photo', document.getElementById('photo').files[0]);
+
+    // const name =  document.getElementById('name').value;
+    // const email = document.getElementById('email').value;
+
+    await updateSettings(form, 'data');
     document.querySelector('.btn--save-userData').textContent = 'SAVE SETTINGS';
   });
 }
