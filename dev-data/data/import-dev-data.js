@@ -5,7 +5,7 @@ const Tour = require('../../models/tourModel');
 const User = require('../../models/userModel');
 const Review = require('../../models/reviewModel');
 
-dotenv.config({ path: `./config.env` });
+dotenv.config({ path: '../../config.env' });
 
 const DB = process.env.DATABASE.replace(
   `<PASSWORD>`,
@@ -33,9 +33,10 @@ const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
 
 const importData = async () => {
   try {
-    await Tour.create(tours);
+    //await Tour.create(tours);
+    //await User.create(users, { validateBeforeSave: false });
     await Review.create(reviews);
-    await User.create(users, { validateBeforeSave: false });
+
     console.log('Data Successfully loaded');
     process.exit();
   } catch (err) {

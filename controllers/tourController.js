@@ -23,6 +23,41 @@ const multerStorage = multer.memoryStorage();
 // Multer function with defined storage space and filter
 const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
+
+exports.resizeTourImages = async (req, res, next) => {
+  if (!req.files.imageCover || !req.files.images) return next();
+
+  // 1) Cover-Image
+  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  // 2) Images
+  req.body.images = [];
+  await Promise.all(
+    req.files.images.map(async (file, i) => {
+      const filename = `tour-${req.params.id}-${i + 1}-cover.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${filename}`);
+
+      req.body.images.push(filename);
+    })
+  );
+  console.log(req.body.images);
+  next();
+};
+
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 // );
@@ -170,18 +205,18 @@ exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 //       tour,
 //     },
 //   });
-//   // } catch (err) {
-//   //   res.status(404).json({
-//   //     status: 'failed',
-//   //   });
-//   // }
+// } catch (err) {
+//   res.status(404).json({
+//     status: 'failed',
+//   });
+// }
 
-//   // res.json({
-//   //   status: 'Success',
-//   //   data: {
-//   //     tour,
-//   //   },
-//   // });
+// res.json({
+//   status: 'Success',
+//   data: {
+//     tour,
+//   },
+// });
 // });
 
 exports.createTour = factory.createOne(Tour);
