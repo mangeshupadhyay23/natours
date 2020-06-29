@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
-const { create } = require('../models/userModel');
+const pug = require('pug');
+const htmlToText = require('html-to-text');
 
 //new Email(user, url);
 
@@ -11,7 +12,7 @@ module.exports = class Email {
     this.from = `Natours Tour <${process.env.EMAIL_FROM}>`;
   }
 
-  createTransport() {
+  newTransport() {
     if (process.env.NODE_ENV === 'production') {
       //Sendgrid
       return 1;
@@ -26,31 +27,60 @@ module.exports = class Email {
       },
     });
   }
+
+  async send(template, subject) {
+    // STEP 1 =>  Render HTML based on a pug template
+    const html = pug.renderFile(
+      `${__dirname}/../views/emails/${template}.pug`,
+      {
+        firstName: this.firstName,
+        url: this.url,
+        subject,
+      }
+    );
+
+    // STEP 2 =>  Define email options
+    const mailOptions = {
+      from: this.from,
+      to: this.to,
+      subject,
+      html,
+      text: htmlToText.fromString(html),
+    };
+
+    // STEP 3 =>  Create a transport and send email
+
+    await this.newTransport().sendMail(mailOptions);
+  }
+
+  async sendWelcome() {
+    await this.send('welcome', 'Welcome to the Natours Family');
+  }
 };
 
-const sendEmail = async (options) => {
-  // Step 1=> Create a Transporter (ex.=>gmail)
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: process.env.EMAIL_PORT,
-    //service: 'Gmail',
-    auth: {
-      user: process.env.EMAIL_USERNAME,
-      pass: process.env.EMAIL_PASSWORD,
-    },
+// const sendEmail = async (options) => {
+//   // Step 1=> Create a Transporter (ex.=>gmail)
+//   const transporter = nodemailer.createTransport({
+//     host: process.env.EMAIL_HOST,
+//     port: process.env.EMAIL_PORT,
+//     //service: 'Gmail',
+//     auth: {
+//       user: process.env.EMAIL_USERNAME,
+//       pass: process.env.EMAIL_PASSWORD,
+//     },
 
-    // Activate in gmail "less secure app" option
-  });
-  // Step 2=> define Options
-  const mailOptions = {
-    from: 'Natours <mshanit@gmail.com>',
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-  };
+//     // Activate in gmail "less secure app" option
+//   });
+//   // Step 2=> define Options
+//   const mailOptions = {
+//     from: 'Natours <mshanit@gmail.com>',
+//     to: options.email,
+//     subject: options.subject,
+//     text: options.message,
+//   };
 
-  // Step 3=> Actually send email with nodemailer
-  await transporter.sendMail(mailOptions);
-};
+//   // Step 3=> Actually send email with nodemailer
+//   await transporter.sendMail(mailOptions);
+// };
 
-module.exports = sendEmail;
+//module.exports = sendEmail;
