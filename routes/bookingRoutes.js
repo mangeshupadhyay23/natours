@@ -8,5 +8,19 @@ router.get(
   authController.protect,
   bookingController.getCheckoutSession
 );
-router.route('/bookings').post(bookingController.createBooking);
+
+router.use(
+  authController.protect,
+  authController.restrictedTo('admin', 'lead-guide')
+);
+router
+  .route('/')
+  .get(bookingController.getAllBookings)
+  .post(authController.protect, bookingController.createBooking);
+
+router
+  .route('/:id')
+  .get(bookingController.getBooking)
+  .patch(bookingController.updateBooking)
+  .delete(bookingController.deleteBooking);
 module.exports = router;
