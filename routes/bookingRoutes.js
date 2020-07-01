@@ -8,4 +8,5 @@ router.get(
   authController.protect,
   bookingController.getCheckoutSession
 );
+router.route('/bookings').post(bookingController.createBooking);
 module.exports = router;
