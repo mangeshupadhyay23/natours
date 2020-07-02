@@ -10,8 +10,8 @@ export const updateSettings = async (data, type) => {
       method: 'PATCH',
       url:
         type === 'data'
-          ? 'http://localhost:3000/api/v1/users/updateME'
-          : 'http://localhost:3000/api/v1/users/updateMyPassword',
+          ? '/api/v1/users/updateME'
+          : '/api/v1/users/updateMyPassword',
       data,
     });
 

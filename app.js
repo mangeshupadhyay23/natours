@@ -5,6 +5,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const helmet = require('helmet');
 const hpp = require('hpp');
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
@@ -64,6 +65,8 @@ app.use(
     ],
   })
 );
+
+app.use(compression());
 
 // Testing middleware
 app.use((req, res, next) => {

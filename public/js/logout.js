@@ -7,13 +7,13 @@ const logout = async () => {
     console.log('sending request');
     const res = await axios({
       method: 'GET',
-      url: 'http://localhost:3000/api/v1/users/logout',
+      url: '/api/v1/users/logout',
     });
     if ((res.data.status = 'success')) location.reload(true);
-    console.log('success');
-    console.log(res.data);
+    //console.log('success');
+    // console.log(res.data);
   } catch (err) {
-    console.log('found error');
+    //console.log('found error');
     showAlert('error', 'Error logging out! Try again.');
   }
 };
